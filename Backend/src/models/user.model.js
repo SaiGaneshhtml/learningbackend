@@ -1,39 +1,54 @@
-import e from 'express';
-import mongoose ,{ Schema } from 'mongoose';
-import { PiPassword } from 'react-icons/pi';
+import mongoose, { Schema } from 'mongoose';
+import bcrypt from 'bcrypt';
 
-const userSchema = new Schema(
-    {  
-        username:{
+const userSchema = new Schema({
+    username: {
+        type: String,
+        required: true,
+        unique: true,   
+        lowercase: true,
+        trim: true,
+        minlength: 1,
+        maxlength: 30,
+    },
+    password: {
+        type: String,
+        required: true,
+        minlength: 6,
+        maxlength: 100
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true,
+    },  
+    loggedIn: {
+        type: Boolean,
+        default: false
+    }
+}, {
+    timestamps: true,
+});
 
-            type: String,
-            required: true,
-            unique: true,   
-            lowercase: true,
-            trim: true,// remove spaces before and after
-            minLenghth: 1,
-            maxLength: 30,
-        },
-
-        Password: {
-            type: String,
-            required: true,
-            minLenghth: 6,
-            maxLength: 100
-        },
-        email: {
-            type: String,
-            required: true,
-            unique: true,
-            lowercase: true,
-            trim: true,
-        },  
-    } ,
-    {
-            timestamps: true,
+// ✅ CORRECT pre-save hook
+userSchema.pre('save', async function() {
+    try {
+        // Only hash if password is modified (new user or password change)
+        if (!this.isModified('password')) {
+            return;
         }
-      
+        
+        // Hash password
+        this.password = await bcrypt.hash(this.password, 10);
+    } catch (error) {
+        throw error;
+    }
+});
 
-)
+userSchema.methods.comparePassword = async function(password) {
+    return await bcrypt.compare(password, this.password);
+};
+
 export const User = mongoose.model('User', userSchema);
-

@@ -5,12 +5,13 @@ const app = express();
 app.use(express.json());
 
 //routes import
-import userRoutes from './routes/user.routes.js';
+import userRouter from './routes/user.route.js';
+
 
 //router declaration
-app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/users', userRouter);
 
-//examole route  :http://localhost:4000/api/v1/users/register
+//example route: http://localhost:4000/api/v1/users/register
 
 
 export default app;
